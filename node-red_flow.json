@@ -1,0 +1,244 @@
+[
+    {
+        "id": "f6f2187d.f17ca8",
+        "type": "tab",
+        "label": "Tclab flow",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "3cc11d24.ff01a2",
+        "type": "comment",
+        "z": "f6f2187d.f17ca8",
+        "name": "WARNING: please check you have started this container with a volume that is mounted to /data\\n otherwise any flow changes are lost when you redeploy or upgrade the container\\n (e.g. upgrade to a more recent node-red docker image).\\n  If you are using named volumes you can ignore this warning.\\n Double click or see info side panel to learn how to start Node-RED in Docker to save your work",
+        "info": "\nTo start docker with a bind mount volume (-v option), for example:\n\n```\ndocker run -it -p 1880:1880 -v /home/user/node_red_data:/data --name mynodered nodered/node-red\n```\n\nwhere `/home/user/node_red_data` is a directory on your host machine where you want to store your flows.\n\nIf you do not do this then you can experiment and redploy flows, but if you restart or upgrade the container the flows will be disconnected and lost. \n\nThey will still exist in a hidden data volume, which can be recovered using standard docker techniques, but that is much more complex than just starting with a named volume as described above.",
+        "x": 350,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "9d7ddf154a5a5667",
+        "type": "serial request",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "serial": "af5383ef48054a73",
+        "x": 640,
+        "y": 380,
+        "wires": [
+            [
+                "ae15d36cf615f2fc"
+            ]
+        ]
+    },
+    {
+        "id": "6fbc4dc26987a30a",
+        "type": "inject",
+        "z": "f6f2187d.f17ca8",
+        "name": "Initialize Count",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 120,
+        "y": 280,
+        "wires": [
+            [
+                "06f12a38b7d8e750"
+            ]
+        ]
+    },
+    {
+        "id": "06f12a38b7d8e750",
+        "type": "change",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "count",
+                "pt": "flow",
+                "to": "1",
+                "tot": "num"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 340,
+        "y": 280,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "3f21af0142a0e088",
+        "type": "inject",
+        "z": "f6f2187d.f17ca8",
+        "name": "Count",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "1",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "",
+        "payload": "count",
+        "payloadType": "flow",
+        "x": 120,
+        "y": 380,
+        "wires": [
+            [
+                "0e2bd34790c6b21c",
+                "114c9ea818c1727d"
+            ]
+        ]
+    },
+    {
+        "id": "0e2bd34790c6b21c",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "Set Query String",
+        "func": "\nconst messages = [\n    \"T1\",\n    \"T2\",\n    \"R1\",\n    \"R2\",\n]\n\nlet index = flow.get(\"count\") % messages.length\n\nmsg.payload = messages[index]\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 340,
+        "y": 380,
+        "wires": [
+            [
+                "9d7ddf154a5a5667"
+            ]
+        ]
+    },
+    {
+        "id": "114c9ea818c1727d",
+        "type": "change",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "count",
+                "pt": "flow",
+                "to": "$flowContext(\"count\") +1",
+                "tot": "jsonata"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 320,
+        "y": 480,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "ae15d36cf615f2fc",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "Format to mqtt message",
+        "func": "msg.payload = parseFloat(msg.payload)\n\nvar topic = msg.request_payload.includes(\"T\")\n    ? \"tclab/sensor/\" \n    : \"tclab/actor/\" \n\nmsg.topic = topic + msg.request_payload\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 930,
+        "y": 380,
+        "wires": [
+            [
+                "435e1fbd12ccc756"
+            ]
+        ]
+    },
+    {
+        "id": "435e1fbd12ccc756",
+        "type": "mqtt out",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "topic": "",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "7f4b5170fce7a7d5",
+        "x": 1230,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "af5383ef48054a73",
+        "type": "serial-port",
+        "serialport": "/dev/ttyACM0",
+        "serialbaud": "9600",
+        "databits": "8",
+        "parity": "none",
+        "stopbits": "1",
+        "waitfor": "",
+        "dtr": "none",
+        "rts": "none",
+        "cts": "none",
+        "dsr": "none",
+        "newline": "\\r\\n",
+        "bin": "false",
+        "out": "char",
+        "addchar": "\\r\\n",
+        "responsetimeout": "10000"
+    },
+    {
+        "id": "7f4b5170fce7a7d5",
+        "type": "mqtt-broker",
+        "name": "",
+        "broker": "mosquitto",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    }
+]
