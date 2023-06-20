@@ -11,6 +11,8 @@ Der erste Record hat den Timestamp `2023-04-04T16:09:25.378Z`, der Zweite `2023-
 
 ![](images/result_2_1.png)
 
+Wir können eine Query bauen, die eine kleine Summary für das measurement `shellies` zurück gibt:
+
 ```
 import "join"
 
@@ -201,3 +203,94 @@ server1
     |> map(fn: (r)=>({r with _value: if r["_value"] < outlierThreshhold then r["_value"] else r["_value"] + outlierCorrection }))
     |> yield(name: "outlier corrected")
 ```
+
+
+
+### Wann ist ein Wert ein Ausreißer und wann nicht? 
+Die Backups werden regelmäßig ausgeführt, so dass ein Muster zu sehen ist. Mit einer Fourier Analyse könnte man das auch zeigen, leider bietet influx db keine dergleichen Möglichkeiten [siehe offener Github feature request](https://github.com/influxdata/influxdb/issues/15122)
+Damit könnten wir diese Frequenzen im Zeitverlauf rausfiltern und so eine bessere Außreißerkorrektur als das genutzte Schwellwertverfahren einsetzen.
+
+
+## Anlagendaten (measurement „AFB“)
+Hinweis: Alle Analysen sind mit dem ersten Datensatz durchgeführt worden
+### In welchen Zeitraum liegen Daten vor?
+Dazu nutzen wir die oben genannte Summary-Query. Der erste Record hat den Timestamp `2023-04-12T07:25:52.815Z`, der Zweite `2023-04-12T07:26:13.664Z`. Dies entspricht einer Zeitspanne von ca. 20s Sekunden.
+
+
+![](images/result_3_1.png)
+
+```
+import "join"
+
+range = from(bucket: "AdlerTasks")
+  |> range(start: -1, stop: now())
+  |> filter(fn: (r) => r["_field"] == "value")
+  |> filter(fn: (r) => r["_measurement"] == "AFB")
+  |> keep(columns: ["_time", "_value", "_measurement"])
+
+join.full(
+    left: range |> first(),
+    right: range |> last(),
+    on: (l, r) => l._measurement == r._measurement, 
+    as: (l, r) => {
+        start = uint(v: l._time)
+        stop = uint(v: r._time)
+
+        return {
+           _time: l._time,
+           _measurement : l._measurement, 
+           _start: l._time,
+           _stop: r._time,
+           // Flux does not support duration column types.
+           // To store durations in a column, convert duration types to strings.
+           _duration: string(v:  duration(v: stop -start)) 
+         }
+    },)
+  |> keep(columns: ["_start", "_stop", "_duration"])
+  |> yield(name: "summary")
+```
+
+
+
+### Wie viele unterschiedliche Sensorwerte gibt es je Baugruppe und insgesamt?
+
+Wir können nach den Assemblies grupieren und mit der union funktion gegeneinander kreuzen. Dadurch bekommen wir die Anzahl der Messungen pro Assembly
+```
+a1 = from(bucket: "AdlerTasks")
+  |> range(start: -1, stop: now())
+  |> filter(fn: (r) => r["_measurement"] == "AFB")
+  |> group(columns: ["Assembly"])
+  |> count()
+
+
+a2 = from(bucket: "AdlerTasks")
+  |> range(start: -1, stop: now())
+  |> filter(fn: (r) => r["_measurement"] == "AFB")
+  |> group(columns: ["Assembly"])
+  |> drop(columns: ["Assembly"])
+  |> count()
+
+
+union(tables: [a1, a2])
+```
+
+![](images/result_3_2.png)
+
+
+### Das Signal „KameraP“ enthält die Wagennummern auf dem Förderband. Wie viele Wagen sind auf dem Förderband gefahren? Bitte beachten Sie: Die ID 0 ist keine Wagennummer
+
+Wir können die ID 0 herausfiltern und mit etwas gruppiermagie eine Zusammenfassung bekommen: 
+```
+from(bucket: "AdlerTasks")
+  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+  |> filter(fn: (r) => r["_measurement"] == "AFB")
+  |> filter(fn: (r) => r["Signal"] == "KameraP")
+  |> filter(fn: (r) => r["_value"] != 0)
+  |> group(columns: ["_value"])
+  |> rename(columns: {_value: "Waggon id"})
+  |> set(key: "Count", value: "_count")
+  |> count(column: "Count")
+  |> group()
+```
+
+![](images/result_3_3.png)
