@@ -272,6 +272,7 @@ a2 = from(bucket: "AdlerTasks")
 
 
 union(tables: [a1, a2])
+  |> drop(columns: ["_start", "_stop"])
 ```
 
 ![](images/result_3_2.png)
