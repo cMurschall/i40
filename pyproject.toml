@@ -8,6 +8,8 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.10"
 tclab = "^0.4.9"
+pandas = "^2.0.2"
+matplotlib = "^3.7.1"
 
 
 [build-system]

@@ -59,7 +59,7 @@ services:
     container_name: node-red
     restart: always
     environment:
-      - TZ=Europe/London
+      - TZ=Europe/Berlin
     ports:
       - '1880:1880'
     volumes:
