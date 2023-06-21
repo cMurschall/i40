@@ -93,10 +93,11 @@ def find_step():
 
 
 def analyze_waggons():
-    # signal_10B3 = read_signal("10B3")
+    signal_10B3 = read_signal("10B3")
     signal_cam = read_signal("KameraP")
 
     print(f"Total time {(signal_cam['_time'].max() - signal_cam['_time'].min()).total_seconds():.2f} s")
+    print(f"Total time {(signal_10B3['_time'].max() - signal_10B3['_time'].min()).total_seconds():.2f} s")
 
     # we cast to int
     signal_cam["value"].astype("int32")
@@ -120,9 +121,40 @@ def analyze_waggons():
     print(df_times.groupby(["waggon"]).agg(['count','mean', 'std']))
 
 
+def analyze_waggons_loads():
+    signal_10B3 = read_signal("10B3")[10:]
+    signal_cam = read_signal("KameraP")[10:]
+    signal_cam = signal_cam[signal_cam["value"] != 0]
+
+
+    print(f"Total time {(signal_cam['_time'].max() - signal_cam['_time'].min()).total_seconds():.2f} s")
+    print(f"Total time {(signal_10B3['_time'].max() - signal_10B3['_time'].min()).total_seconds():.2f} s")
+
+
+    signal_10B3["state"] = np.where(signal_10B3["value"] > 0.1, "On", "Off")
+
+    fig, ax1 = plt.subplots()
+    colors = {'On': 'tab:green', 'Off': 'tab:red'}
+    ax1.scatter(signal_10B3["_time"], signal_10B3["state"], c=signal_10B3["state"].map(colors))
+    ax1.set_ylabel("Signal 10B3 state")
+
+    signal_cam["value"].astype(np.int32).astype("str")
+    ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
+
+    colors = {'12':'tab:brown', '19':'tab:orange', '23':'tab:purple', '24':'tab:brown'}
+    wagons = signal_cam["value"].astype(np.int32).astype("str")
+    ax2.scatter(signal_cam["_time"], wagons, c=wagons.map(colors))
+    ax2.margins(y=0.4)
+    ax2.set_ylabel("Waggon")
+
+    ax1.xaxis.set_major_formatter(DateFormatter('%H:%M'))
+
+    plt.title("Waggon loads")
+    plt.show()
+
 
 
 
 if __name__ == '__main__':
     # find_step()
-    analyze_waggons()
+    analyze_waggons_loads()

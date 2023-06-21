@@ -295,3 +295,27 @@ from(bucket: "AdlerTasks")
 ```
 
 ![](images/result_3_3.png)
+
+
+
+## Python API
+
+### Wie lange dauerte der Umlauf je Wagen (Mittelwert und Std.Abw.)
+
+Die Umläufe pro Wagen.
+```
+            count        mean        std
+waggon                                  
+12.0            3  144.685828  64.913342
+19.0            3  120.012225  36.872056
+23.0            3  143.350372  64.439945
+24.0            3   95.007988  34.647751
+```
+Die Berechnung ist in der Funktion [analyze_waggons](influxdb_analyse.py) hinterlegt.
+
+### Wann waren die Wagen voll und wann waren die Wagen leer?
+So ganz klar ist es noch nicht, wie die Wagen beladen sind. Der Sensor 10B3 wird kurz vor der Kamera ein- und wieder ausgeschaltet, doch wie daraus auf den Ladezustand des Wagens geschlossen werden kann ist mir noch nicht ganz klar. 
+
+
+![](images/plot_result_3_3.png)
+
