@@ -114,9 +114,10 @@ def analyze_waggons():
                 }
                 df_times = pd.concat([df_times, pd.DataFrame([new_item])])
                 break
-    print(f"Mean roundtrip time: {df_times['delta_time'].mean():.2f} s")
-    print(f"Standard deviation roundtrip time: {df_times['delta_time'].std():.2f} s")
 
+
+    print(f"Roundtrip times: ")
+    print(df_times.groupby(["waggon"]).agg(['count','mean', 'std']))
 
 
 
