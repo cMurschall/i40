@@ -299,7 +299,7 @@ from(bucket: "AdlerTasks")
 
 
 ## Python API
-
+Hinweis: Alle Analysen sind mit dem zweiten Datensatz durchgeführt worden
 ### Wie lange dauerte der Umlauf je Wagen (Mittelwert und Std.Abw.)
 
 Die Umläufe pro Wagen.
