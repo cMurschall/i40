@@ -17,7 +17,7 @@ Wir können eine Query bauen, die eine kleine Summary für das measurement `shel
 import "join"
 
 range = from(bucket: "AdlerTasks")
-  |> range(start: -1, stop: now())
+  |> range(start: 0, stop: now())
   |> filter(fn: (r) => r["_measurement"] == "shellies")
   |> filter(fn: (r) => r["_field"] == "value")
   |> keep(columns: ["_time", "_value", "_measurement"])
@@ -51,7 +51,7 @@ join.full(
 
 ```
 from(bucket: "AdlerTasks")
-  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+  |> range(start: 0, stop: now())
   |> filter(fn: (r) => r["_measurement"] == "shellies")
   |> filter(fn: (r) => r["Sensor"] == "power")
   |> filter(fn: (r) => r["_field"] == "value")
@@ -223,7 +223,7 @@ Dazu nutzen wir die oben genannte Summary-Query. Der erste Record hat den Timest
 import "join"
 
 range = from(bucket: "AdlerTasks")
-  |> range(start: -1, stop: now())
+  |> range(start: 0, stop: now())
   |> filter(fn: (r) => r["_field"] == "value")
   |> filter(fn: (r) => r["_measurement"] == "AFB")
   |> keep(columns: ["_time", "_value", "_measurement"])
@@ -257,14 +257,14 @@ join.full(
 Wir können nach den Assemblies grupieren und mit der union funktion gegeneinander kreuzen. Dadurch bekommen wir die Anzahl der Messungen pro Assembly
 ```
 a1 = from(bucket: "AdlerTasks")
-  |> range(start: -1, stop: now())
+  |> range(start: 0, stop: now())
   |> filter(fn: (r) => r["_measurement"] == "AFB")
   |> group(columns: ["Assembly"])
   |> count()
 
 
 a2 = from(bucket: "AdlerTasks")
-  |> range(start: -1, stop: now())
+  |> range(start: 0, stop: now())
   |> filter(fn: (r) => r["_measurement"] == "AFB")
   |> group(columns: ["Assembly"])
   |> drop(columns: ["Assembly"])
@@ -283,7 +283,7 @@ union(tables: [a1, a2])
 Wir können die ID 0 herausfiltern und mit etwas gruppiermagie eine Zusammenfassung bekommen: 
 ```
 from(bucket: "AdlerTasks")
-  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+  |> range(start: 0, stop: now())
   |> filter(fn: (r) => r["_measurement"] == "AFB")
   |> filter(fn: (r) => r["Signal"] == "KameraP")
   |> filter(fn: (r) => r["_value"] != 0)
