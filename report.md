@@ -47,7 +47,7 @@ join.full(
 
 
 ### Wieviel Strom wurde je Stunde benötigt?
-
+Wir können eine Query schreiben, die die über ein 1-Stunden Fenster den Mittelwert aggregiert und ausgibt:
 
 ```
 from(bucket: "AdlerTasks")
@@ -177,6 +177,7 @@ meanAfter = total
 
 #### Ausreißer Server 1
 
+Die Außreißer wurden vereinfacht als > 175 angenommen und in der Grafik als violette Linie eingezeichnet.
 
 ![](images/result_2_5_3.png)
 ```
@@ -212,7 +213,7 @@ Damit könnten wir diese Frequenzen im Zeitverlauf rausfiltern und so eine besse
 
 
 ## Anlagendaten (measurement „AFB“)
-Hinweis: Alle Analysen sind mit dem ersten Datensatz durchgeführt worden
+Hinweis: Alle Analysen sind mit dem ersten Datensatz (Im Bucket `AdlerTasks`) durchgeführt worden
 ### In welchen Zeitraum liegen Daten vor?
 Dazu nutzen wir die oben genannte Summary-Query. Der erste Record hat den Timestamp `2023-04-12T07:25:52.815Z`, der Zweite `2023-04-12T07:26:13.664Z`. Dies entspricht einer Zeitspanne von ca. 20s Sekunden.
 
@@ -254,7 +255,11 @@ join.full(
 
 ### Wie viele unterschiedliche Sensorwerte gibt es je Baugruppe und insgesamt?
 
-Wir können nach den Assemblies grupieren und mit der union funktion gegeneinander kreuzen. Dadurch bekommen wir die Anzahl der Messungen pro Assembly
+Wir können nach den Assemblies grupieren und mit der union funktion gegeneinander kreuzen. Dadurch bekommen wir die Anzahl der Messungen pro Assembly.
+
+
+![](images/result_3_2.png)
+
 ```
 a1 = from(bucket: "AdlerTasks")
   |> range(start: 0, stop: now())
@@ -275,12 +280,15 @@ union(tables: [a1, a2])
   |> drop(columns: ["_start", "_stop"])
 ```
 
-![](images/result_3_2.png)
+
 
 
 ### Das Signal „KameraP“ enthält die Wagennummern auf dem Förderband. Wie viele Wagen sind auf dem Förderband gefahren? Bitte beachten Sie: Die ID 0 ist keine Wagennummer
 
-Wir können die ID 0 herausfiltern und mit etwas gruppiermagie eine Zusammenfassung bekommen: 
+Wir können die ID 0 herausfiltern und mit etwas gruppiermagie eine Zusammenfassung bekommen.
+
+![](images/result_3_3.png)
+
 ```
 from(bucket: "AdlerTasks")
   |> range(start: 0, stop: now())
@@ -294,7 +302,7 @@ from(bucket: "AdlerTasks")
   |> group()
 ```
 
-![](images/result_3_3.png)
+
 
 
 
@@ -315,6 +323,9 @@ Die Berechnung ist in der Funktion [analyze_waggons](influxdb_analyse.py) hinter
 
 ### Wann waren die Wagen voll und wann waren die Wagen leer?
 So ganz klar ist es noch nicht, wie die Wagen beladen sind. Der Sensor 10B3 wird kurz vor der Kamera ein- und wieder ausgeschaltet, doch wie daraus auf den Ladezustand des Wagens geschlossen werden kann ist mir noch nicht ganz klar. 
+
+
+Die Berechnung ist in der Funktion [analyze_waggons_loads](influxdb_analyse.py) hinterlegt.
 
 
 ![](images/plot_result_3_3.png)
