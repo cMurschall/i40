@@ -90,11 +90,14 @@ def find_step():
     ax2.plot((step_time, step_time), (data_step[step_index] / 10, 0), 'r')
 
     ax2.text(df["_time"].loc[step_index - 620], 10, step_time.strftime("%m.%d. %H:%M Uhr"), color='r')
-    # added these three lines
-    # ask matplotlib for the plotted objects and their labels
+    ax2.set_yticklabels([])
+
+
+
+
     lines, labels = ax1.get_legend_handles_labels()
     lines2, labels2 = ax2.get_legend_handles_labels()
-    ax2.legend(lines + lines2, labels + labels2, loc=0)
+    ax2.legend(lines + lines2, labels + labels2, loc='lower right')
 
     plt.show()
 
