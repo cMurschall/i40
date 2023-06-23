@@ -48,7 +48,7 @@ Der Nachteil ist die eher umständliche Konfiguration und die schlechte Debuggba
 
 
 
-Das `docker-compose` file erwartet eine enviroment.env Datei die folgende Struktur haben muss:
+Die `docker-compose` Dile erwartet eine `enviroment.env` Datei mit geheimen Informationen die folgende Struktur haben muss:
 ```
 DOCKER_INFLUXDB_INIT_MODE=setup
 DOCKER_INFLUXDB_INIT_USERNAME=
