@@ -17,7 +17,7 @@ KERNEL=="ttyACM[0-9]*", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001",  MODE
 ```
 
 Damit haben wir den seriellen Port für alle Nutzer freigegeben und das Sicherheitssystem von Linux außer Kraft gesetzt. Da unter Linux jedes Gerät eine Datei ist, sollte es eigentlich möglich sein, diese in den Container zu mounten. Dies ist leider nicht gelungen. Als Abhilfe können wir den Port aber als Device übergeben. In der [docker-compose datei](docker-compose.yml#L68) ist das diese Zeile:
-```
+```yaml
 devices:
     - "/dev/ttyACM0:/dev/ttyACM0"
 ```
