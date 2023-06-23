@@ -39,21 +39,6 @@ services:
     volumes:
       - influxdb_data:/var/lib/influxdb
 
-  grafana:
-    image: grafana/grafana
-    container_name: grafana-server
-    restart: always
-    depends_on:
-      - influxdb
-    environment:
-      - GF_SECURITY_ADMIN_USER=user
-      - GF_SECURITY_ADMIN_PASSWORD=user
-      - GF_INSTALL_PLUGINS=
-    ports:
-      - '3000:3000'
-    volumes:
-      - grafana_data:/var/lib/grafana
-
   node-red:
     image: nodered/node-red:latest
     container_name: node-red

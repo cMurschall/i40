@@ -45,3 +45,19 @@ return msg;
 Der komplette Flow ist [hier](node-red_flow.json)  abgelegt. Wir konfigurieren zusätzlich einen telegraf Service, der sich auf das Mqtttopic registriert (_subscribe_), transformiert und in die influxdb speichert. Die Wahl von telegraf hat Vor- und Nachteile. Der Vorteil ist, dass die Transformation ohne Programierkenntnisse möglich ist und neue Signale sehr schnell hinzugefügt werden können. Ein weiterer Vorteil ist, das telegraf und docker ein Match made in heaven ist, da telegraf sehr einfach die Metriken des docker hosts abfragen und in telegraf speichern kann, so dass wir das System-Monitoring geschenkt bekommen. 
 
 Der Nachteil ist die eher umständliche Konfiguration und die schlechte Debuggbarkeit zur Fehlersuche. Die Konfiguration limitiert außerdem die Transformationsmöglichkeiten.
+
+
+
+Das `docker-compose` file erwartet eine enviroment.env Datei die folgende Struktur haben muss:
+```
+DOCKER_INFLUXDB_INIT_MODE=setup
+DOCKER_INFLUXDB_INIT_USERNAME=
+DOCKER_INFLUXDB_INIT_PASSWORD=
+DOCKER_INFLUXDB_INIT_ORG=
+DOCKER_INFLUXDB_INIT_BUCKET=
+DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=
+
+INFLUXDB_DB=
+INFLUXDB_ADMIN_USER=
+INFLUXDB_ADMIN_PASSWORD=
+```
